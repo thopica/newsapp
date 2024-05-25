@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Note Taking App</title>
+    <style>
+        body {
+            display: flex;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+        #sidebar {
+            width: 250px;
+            background: #2c3e50;
+            color: white;
+            padding: 10px;
+            overflow-y: auto;
+        }
+        #main {
+            flex: 1;
+            padding: 10px;
+        }
+        .note-title {
+            background: #34495e;
+            padding: 10px;
+            margin-bottom: 5px;
+            cursor: pointer;
+        }
+        .note-title:hover {
+            background: #1abc9c;
+        }
+        #new-note, #save-note, #close-note {
+            padding: 10px 15px;
+            margin-right: 5px;
+            background: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        #new-note:hover, #save-note:hover, #close-note:hover {
+            background: #2980b9;
+        }
+        #note-editor {
+            display: none;
+            flex-direction: column;
+        }
+        #note-text {
+            flex: 1;
+            padding: 10px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="sidebar">
+        <button id="new-note">New Note</button>
+        <div id="note-list"></div>
+    </div>
+    <div id="main">
+        <div id="note-editor">
+            <textarea id="note-text" rows="10" cols="30"></textarea>
+            <div>
+                <button id="save-note">Save Note</button>
+                <button id="close-note">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let notes = JSON.parse(localStorage.getItem('notes')) || [];
+        const noteList = document.getElementById('note-list');
+        const noteEditor = document.getElementById('note-editor');
+        const noteText = document.getElementById('note-text');
+        const newNoteButton = document.getElementById('new-note');
+        const saveNoteButton = document.getElementById('save-note');
+        const closeNoteButton = document.getElementById('close-note');
+
+        let currentNoteIndex = null;
+
+        function renderNotes() {
+            noteList.innerHTML = '';
+            notes.forEach((note, index) => {
+                const noteTitle = document.createElement('div');
+                noteTitle.classList.add('note-title');
+                noteTitle.textContent = note.slice(0, 20) + '...';
+                noteTitle.addEventListener('click', () => openNoteEditor(index));
+                noteList.appendChild(noteTitle);
+            });
+        }
+
+        function openNoteEditor(index = null) {
+            currentNoteIndex = index;
+            if (index !== null) {
+                noteText.value = notes[index];
+            } else {
+                noteText.value = '';
+            }
+            noteEditor.style.display = 'flex';
+        }
+
+        function saveNote() {
+            const noteContent = noteText.value;
+            if (currentNoteIndex !== null) {
+                notes[currentNoteIndex] = noteContent;
+            } else {
+                notes.unshift(noteContent);
+            }
+            localStorage.setItem('notes', JSON.stringify(notes));
+            renderNotes();
+            noteEditor.style.display = 'none';
+        }
+
+        function closeNoteEditor() {
+            noteEditor.style.display = 'none';
+        }
+
+        newNoteButton.addEventListener('click', () => openNoteEditor());
+        saveNoteButton.addEventListener('click', saveNote);
+        closeNoteButton.addEventListener('click', closeNoteEditor);
+
+        renderNotes();
+    </script>
+</body>
+</html>
